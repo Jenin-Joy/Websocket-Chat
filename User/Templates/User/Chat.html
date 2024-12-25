@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Chat</title>
+    <style>
+        #status {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        #chat-log {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 200px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+        }
+        #chat-message-input {
+            width: 80%;
+            padding: 5px;
+        }
+        #chat-message-submit {
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simple Chat</h1>
+    <input type="hidden" name="txt_id" id="txt_id" value="{{reciver}}">
+    <input type="hidden" name="txt_sender" id="txt_sender" value="{{sender}}">
+    <div id="status">Connecting...</div>
+    <div id="chat-log">
+        {% for i in message %}
+        {{i.message}}
+        {% endfor %}
+    </div>
+    <input id="chat-message-input" type="text" placeholder="Type your message..." disabled>
+    <button id="chat-message-submit" disabled>Send</button>
+
+    <script>
+        // WebSocket connection
+        const chatSocket = new WebSocket(`ws://127.0.0.1:8000/ws/chat/`);
+        
+        // DOM elements
+        const statusDiv = document.getElementById('status');
+        const chatLog = document.getElementById('chat-log');
+        const messageInput = document.getElementById('chat-message-input');
+        const messageSubmit = document.getElementById('chat-message-submit');
+        const reciver = document.getElementById('txt_id').value;
+        const sender = document.getElementById('txt_sender').value;
+
+        // Update UI on successful connection
+        chatSocket.onopen = function() {
+            statusDiv.textContent = 'Connected';
+            statusDiv.style.color = 'green';
+            messageInput.disabled = false;
+            messageSubmit.disabled = false;
+        };
+
+        // Handle incoming messages
+        chatSocket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            // chatLog.innerHTML += `<p>${data.messages}${data.reciver}</p>`;
+            chatLog.innerHTML += '';
+            // data.messages.forEach(function(messageData) {
+            //     // Display each message in the chat log
+            //     chatLog.innerHTML += `<p>${messageData.message}</p>`;
+            //     console.log(messageData.message);
+            // });
+            
+        };
+
+        // Handle disconnection
+        chatSocket.onclose = function() {
+            statusDiv.textContent = 'Disconnected';
+            statusDiv.style.color = 'red';
+            messageInput.disabled = true;
+            messageSubmit.disabled = true;
+        };
+
+        // Handle errors
+        chatSocket.onerror = function(error) {
+            console.error('WebSocket Error:', error);
+            statusDiv.textContent = 'Error occurred';
+            statusDiv.style.color = 'orange';
+        };
+
+        // Send message on button click
+        messageSubmit.onclick = function() {
+            const message = messageInput.value;
+            if (message.trim() !== '') {
+                chatSocket.send(JSON.stringify({ message, reciver, sender }));
+                messageInput.value = ''; // Clear the input field
+            }
+        };
+
+        // Allow Enter key to send messages
+        messageInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                messageSubmit.click();
+            }
+        });
+    </script>
+</body>
+</html>
