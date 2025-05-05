@@ -12,7 +12,7 @@
         {% for i in user %}
         <tr>
             <td>{{i.user_name}}</td>
-            <td><a href="{% url 'User:chat' i.id %}">Chat</a></td>
+            <td><a href="{% url 'Chatapp:chat' i.id %}">Chat</a></td>
         </tr>
         {% endfor %}
         <!-- <input type="file" name="photo" id="photo">

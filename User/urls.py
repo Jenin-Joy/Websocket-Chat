@@ -4,5 +4,5 @@ app_name = 'User'
 
 urlpatterns = [
     path('homepage/',views.homepage,name="homepage"),
-    path('chat/<int:id>',views.chat,name="chat"),
+    path('chatold/<int:id>',views.chatold,name="chatold"),
 ]
